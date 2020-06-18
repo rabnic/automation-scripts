@@ -120,12 +120,13 @@ def get_body_section(message):
         body = str(message['parts'][0]['body']['data'])
         body_decoded = base64.urlsafe_b64decode(body).decode()
         section = body_decoded[:body_decoded.index('--')].replace('\r\n\r', '').strip()
-        company = section[section.find('by') + 3: section.find('.', 70)]
-        if not company:
+        company = section[section.find('by', 50) + 3: section.find('.', 70)]
+        if 'asked' in company:
             # For email bodies missing the 'by' word mistakenly
-            company = section[section.find('asked') + 3: section.find('.', 85)]
-        return company
-        # question = ''
+            company = company[company.rfind(' '):]
+        question = section[section.find('.', 65):]
+
+        return company, question
     except ValueError as err:
         print(err)
 
