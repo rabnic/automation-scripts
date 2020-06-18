@@ -5,6 +5,8 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient import errors
+import base64
+import email
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -40,7 +42,7 @@ def get_gmail_api_service():
     return build('gmail', 'v1', credentials=creds)
 
 
-def list_messages(service, user_id, query=''):
+def list_message_ids(service, user_id, query=''):
     """List all Messages of the user's mailbox matching the query.
 
   Args:
@@ -68,19 +70,49 @@ def list_messages(service, user_id, query=''):
                                                        pageToken=page_token).execute()
             messages.extend(response['messages'])
 
-        return messages
+        return [message['id'] for message in messages]
     except errors.HttpError as error:
         print(f"An error occurred: {error}")
 
 
+def get_message(service, user_id, msg_id):
+    """Get a Message with given ID.
+
+  Args:
+    service: Authorized Gmail API service instance.
+    user_id: User's email address. The special value "me"
+    can be used to indicate the authenticated user.
+    msg_id: The ID of the Message required.
+
+  Returns:
+    A Message.
+  """
+    try:
+        message = service.users().messages().get(userId=user_id, id=msg_id).execute()
+
+        # print(f"{message['payload']}")
+
+        return message['payload']
+    except errors.HttpError as error:
+        print(f"An error occurred: {error}")
+
+
+
+
 def main():
     """
-    The function to execute and integrate all function in one place
+    The main function to execute and integrate all function in one place
     :return: None for now
     """
-    messages = list_messages(service=get_gmail_api_service(),
-                             user_id='me', query='from:founders@dailycodingproblem.com')
-    print(messages)
+
+    # Gmail API Service
+    service = get_gmail_api_service()
+    messages = list_message_ids(service=service,
+                                user_id='me', query='from:founders@dailycodingproblem.com')
+    for msg_id in messages:
+        msg = get_message(service, user_id='me', msg_id=msg_id)
+        # print(get_subject(msg))
+
     print(f"Daily Coding Problems sent {len(messages)} emails")
 
 
