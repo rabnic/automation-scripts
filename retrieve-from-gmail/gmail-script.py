@@ -105,7 +105,10 @@ def get_subject(message):
     """
     for header in message['headers']:
         if header['name'] == 'Subject':
-            return header['value']
+            subject = header['value']
+            problem_number = subject[subject.find('#'):subject.find('[')]
+            difficulty = subject[subject.find('[') + 1: -1]
+            return problem_number, difficulty
 
 
 def get_body_section(message):
@@ -126,6 +129,7 @@ def get_body_section(message):
             company = company[company.rfind(' '):]
         question = section[section.find('.', 65):]
 
+        # company = The name of the company that asked the interview question
         return company, question
     except ValueError as err:
         print(err)
@@ -143,8 +147,8 @@ def main():
                                 user_id='me', query='"subject:Daily Coding Problem: Problem #"')
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
-        #print('Subject:', get_subject(msg), end='')
-        print('Body:', get_body_section(msg))
+        print('Subject:', get_subject(msg))
+        # print('Body:', get_body_section(msg))
 
     print(f"Daily Coding Problems sent {len(messages)} emails")
 
