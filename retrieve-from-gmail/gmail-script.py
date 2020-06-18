@@ -97,6 +97,15 @@ def get_message(service, user_id, msg_id):
         print(f"An error occurred: {error}")
 
 
+def get_subject(message):
+    """
+    Extract the subject of email from message object
+    :param message: Gmail message object(json)
+    :return: Subject text
+    """
+    for header in message['headers']:
+        if header['name'] == 'Subject':
+            return header['value']
 
 
 def main():
@@ -111,7 +120,7 @@ def main():
                                 user_id='me', query='from:founders@dailycodingproblem.com')
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
-        # print(get_subject(msg))
+        print(get_subject(msg))
 
     print(f"Daily Coding Problems sent {len(messages)} emails")
 
