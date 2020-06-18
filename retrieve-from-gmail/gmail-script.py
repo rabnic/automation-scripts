@@ -108,6 +108,28 @@ def get_subject(message):
             return header['value']
 
 
+def get_body_section(message):
+    """
+    Extract section of body that contains Coding Problem question and example
+    Note: The section contains the name of the big company and the interview question asked.
+
+    :param message: Gmail message object(json)
+    :return: tuple containing company and question asked
+    """
+    try:
+        body = str(message['parts'][0]['body']['data'])
+        body_decoded = base64.urlsafe_b64decode(body).decode()
+        section = body_decoded[:body_decoded.index('--')].replace('\r\n\r', '').strip()
+        company = section[section.find('by') + 3: section.find('.', 70)]
+        if not company:
+            # For email bodies missing the 'by' word mistakenly
+            company = section[section.find('asked') + 3: section.find('.', 85)]
+        return company
+        # question = ''
+    except ValueError as err:
+        print(err)
+
+
 def main():
     """
     The main function to execute and integrate all function in one place
@@ -117,10 +139,11 @@ def main():
     # Gmail API Service
     service = get_gmail_api_service()
     messages = list_message_ids(service=service,
-                                user_id='me', query='from:founders@dailycodingproblem.com')
+                                user_id='me', query='"subject:Daily Coding Problem: Problem #"')
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
-        print(get_subject(msg))
+        #print('Subject:', get_subject(msg), end='')
+        print('Body:', get_body_section(msg))
 
     print(f"Daily Coding Problems sent {len(messages)} emails")
 
