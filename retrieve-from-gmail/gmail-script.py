@@ -6,7 +6,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient import errors
 import base64
-import email
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -145,10 +144,12 @@ def main():
     service = get_gmail_api_service()
     messages = list_message_ids(service=service,
                                 user_id='me', query='"subject:Daily Coding Problem: Problem #"')
+    daily_coding_problems = []
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
         question_num, difficulty = get_subject(msg)
         company, question = get_body_section(msg)
+        daily_coding_problems.append((question_num, difficulty, company, question))
         print('Problem:', (question_num, difficulty, company, question))
 
     print(f"Daily Coding Problems sent {len(messages)} emails")
