@@ -1,4 +1,4 @@
-## Fetch Daily Coding Problems
+# Fetch Daily Coding Problems
 The overall purpose of this script is to log into my Gmail account and retrieve all emails sent  daily by [Daily Coding Problem](https://www.dailycodingproblem.com) with subject *'Daily Coding Problem: Problem #.'*
 
 So what is **Daily Coding Problem** all about?
