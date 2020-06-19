@@ -19,6 +19,7 @@ def get_gmail_api_service():
     creds = None
     creds_file = os.path.abspath('../../..') + '/credentials.json'
     token_file = os.path.abspath('../../..') + '/token.pickle'
+
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
@@ -57,16 +58,14 @@ def list_message_ids(service, user_id, query=''):
     appropriate ID to get the details of a Message.
   """
     try:
-        response = service.users().messages().list(userId=user_id,
-                                                   q=query).execute()
+        response = service.users().messages().list(userId=user_id, q=query).execute()
         messages = []
         if 'messages' in response:
             messages.extend(response['messages'])
 
         while 'nextPageToken' in response:
             page_token = response['nextPageToken']
-            response = service.users().messages().list(userId=user_id, q=query,
-                                                       pageToken=page_token).execute()
+            response = service.users().messages().list(userId=user_id, q=query, pageToken=page_token).execute()
             messages.extend(response['messages'])
 
         return [message['id'] for message in messages]
@@ -110,13 +109,13 @@ def get_subject(message):
             return problem_number, difficulty
 
 
-def get_body_section(message):
+def get_company_and_question(message):
     """
     Extract section of body that contains Coding Problem question and example if given
     Note: The section contains the name of the big company and the interview question asked.
 
     :param message: Gmail message object(json)
-    :return: tuple containing company and question asked
+    :return: tuple containing company and interview question asked
     """
     try:
         body = str(message['parts'][0]['body']['data'])
@@ -124,7 +123,7 @@ def get_body_section(message):
         section = body_decoded[:body_decoded.index('--')].replace('\r\n\r', '').strip()
         company = section[section.find('by', 50) + 3: section.find('.', 70)]
         if 'asked' in company:
-            # For email bodies missing the 'by' word mistakenly
+            # For email bodies missing the 'by' word
             company = company[company.rfind(' '):]
         question = section[section.find('.', 65):]
 
@@ -148,11 +147,10 @@ def main():
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
         question_num, difficulty = get_subject(msg)
-        company, question = get_body_section(msg)
+        company, question = get_company_and_question(msg)
         daily_coding_problems.append((question_num, difficulty, company, question))
-        print('Problem:', (question_num, difficulty, company, question))
 
-    print(f"Daily Coding Problems sent {len(messages)} emails")
+    print(f"Daily Coding Problems sent: ", daily_coding_problems, sep='\n')
 
 
 if __name__ == '__main__':
