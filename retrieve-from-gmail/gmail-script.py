@@ -113,7 +113,7 @@ def get_subject(message):
 
 def get_body_section(message):
     """
-    Extract section of body that contains Coding Problem question and example
+    Extract section of body that contains Coding Problem question and example if given
     Note: The section contains the name of the big company and the interview question asked.
 
     :param message: Gmail message object(json)
@@ -147,8 +147,9 @@ def main():
                                 user_id='me', query='"subject:Daily Coding Problem: Problem #"')
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
-        print('Subject:', get_subject(msg))
-        # print('Body:', get_body_section(msg))
+        question_num, difficulty = get_subject(msg)
+        company, question = get_body_section(msg)
+        print('Problem:', (question_num, difficulty, company, question))
 
     print(f"Daily Coding Problems sent {len(messages)} emails")
 
