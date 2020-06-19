@@ -95,11 +95,11 @@ def get_message(service, user_id, msg_id):
         print(f"An error occurred: {error}")
 
 
-def get_subject(message):
+def get_prob_num_and_difficulty(message):
     """
     Extract the subject of email from message object
     :param message: Gmail message object(json)
-    :return: Subject text
+    :return: Tuple containing coding problem number and difficulty
     """
     for header in message['headers']:
         if header['name'] == 'Subject':
@@ -146,7 +146,7 @@ def main():
     daily_coding_problems = []
     for msg_id in messages:
         msg = get_message(service, user_id='me', msg_id=msg_id)
-        question_num, difficulty = get_subject(msg)
+        question_num, difficulty = get_prob_num_and_difficulty(msg)
         company, question = get_company_and_question(msg)
         daily_coding_problems.append((question_num, difficulty, company, question))
 
@@ -154,5 +154,4 @@ def main():
 
 
 if __name__ == '__main__':
-    pass
     main()
